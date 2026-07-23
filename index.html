@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>2048 Game</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <main class="container">
+
+        <h1 class="title">MORE! MORE! HIYORI!<br>
+        2048</h1>
+
+        <div class="top-bar">
+
+            <div class="score-box">
+                <div class="score-inner">
+                    <span class="label">SCORE</span>
+                    <span id="score">0</span>
+                </div>
+            </div>
+
+            <div class="score-box best-score">
+                <div class="score-inner">
+                    <span class="label">BEST</span>
+                    <span id="best-score">0</span>
+                </div>
+            </div>
+
+        </div>
+
+        <div id="message" class="message hidden">
+            <p id="message-text"></p>
+        </div>
+
+        <div id="game-board" class="game-board">
+        </div>
+
+        <div class="instructions">
+            <p>← ↑ → ↓ キーでパネルを動かします。同じ数字のパネルを合わせて2048，または4096を目指そう！</p>
+            
+        </div>
+
+        <button id="restart-btn">
+                New Game
+        </button>
+        <div class="credit">
+
+            <p>製作者：はじめ</p>
+            <p>二次創作ゲームになります。本作品は『あんさんぶるスターズ！！』の非公式ファンゲームです。Happy Elements株式会社および関連各社とは一切関係ありません。</p>
+                
+            <p>本作品は営利目的ではなく、ファンによる二次創作作品として公開しています。 </p>
+
+            <h3>Sound Effects</h3>
+
+            <p class="credit-sound">
+                効果音：<a href="https://otologic.jp/" target="_blank">
+                OtoLogic（CC BY 4.0）
+                </a>
+            </p>
+
+        </div>
+
+    </main>
+
+    
+
+    <div id="overlay" class="overlay hidden">
+
+        <div class="overlay-box">
+
+            <h2 id="overlay-title"></h2>
+
+            <p id="overlay-text"></p>
+
+            <button id="overlay-button">
+                もう一度遊ぶ
+            </button>
+
+        </div>
+
+    </div>
+
+
+
+    <script src="script.js"></script>
+
+</body>
+</html>
