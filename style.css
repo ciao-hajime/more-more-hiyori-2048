@@ -282,19 +282,19 @@ h3 {
 }
 /* ---------- オーバーレイ ---------- */
 
-.overlay{
+.overlay {
+    position: absolute;
+    inset: 0;
 
-    position:fixed;
-    inset:0;
+    background: rgba(255, 255, 255, 0.35);
 
-    background:rgba(0,0,0,.45);
+    display: flex;
+    justify-content: center;
+    align-items: center;
 
-    display:flex;
-    justify-content:center;
-    align-items:center;
+    z-index: 100;
 
-    z-index:100;
-
+    border-radius: 10px;
 }
 
 .hidden{

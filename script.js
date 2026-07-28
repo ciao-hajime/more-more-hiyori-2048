@@ -438,7 +438,7 @@ function move(direction) {
     setTimeout(() => {
         showOverlay(
             "🌞 Game Over",
-            "うんうん♬最後まで遊んでくれてありがとう！\nもう一度挑戦してみよう♪"
+            "うんうん♬最後まで遊んでくれてありがとう！\nまた挑戦してね♪"
         );
     },150);
 
