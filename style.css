@@ -432,3 +432,20 @@ h3 {
     }
 
 }
+/* =========================
+   パネル移動
+   ========================= */
+
+@keyframes tile-slide {
+
+    from {
+        transform: scale(0.95);
+        opacity: 0.8;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+}

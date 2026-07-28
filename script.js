@@ -60,6 +60,7 @@ let cleared = false;
 let gameOver = false;
 let mergedTiles = [];
 
+
 // ---------- 初期化 ----------
 function initGame() {
 
@@ -147,7 +148,7 @@ function loadGame() {
 }
 
 // ---------- 描画 ----------
-function renderBoard() {
+function renderBoard(animationData = null) {
 
     console.log(board);
 
@@ -158,36 +159,41 @@ function renderBoard() {
         const cell = document.createElement("div");
         cell.className = "cell";
 
-            if (value !== 0) {
+        if (value !== 0) {
 
-                cell.classList.add(`tile-${value}`);
+            cell.classList.add(`tile-${value}`);
 
-                // ★ここへ移動！
-                if (mergedTiles.includes(index)) {
-                    cell.classList.add("pop");
-                }
-
-                // 数字
-                const number = document.createElement("span");
-                number.className = "tile-number";
-                number.textContent = value;
-
-                // 画像
-                const img = document.createElement("img");
-                img.src = `images/${value}.png`;
-                img.alt = value;
-
-                cell.appendChild(number);
-                cell.appendChild(img);
+            // 合体アニメーション
+            if (mergedTiles.includes(index)) {
+                cell.classList.add("pop");
             }
 
-            gameBoard.appendChild(cell);
+            // 数字
+            const number = document.createElement("span");
+            number.className = "tile-number";
+            number.textContent = value;
+
+            // 画像
+            const img = document.createElement("img");
+            img.src = `images/${value}.png`;
+            img.alt = value;
+
+            cell.appendChild(number);
+            cell.appendChild(img);
+
+            // 動いたパネルだけアニメーション
+            if (animationData && animationData.includes(index)) {
+                cell.classList.add("slide");
+            }
+        }
+
+        gameBoard.appendChild(cell);
 
     });
 
     console.log("マスの数:", gameBoard.children.length);
 
-}       
+}
 
 // ---------- ランダム生成 ----------
 function addRandomTile() {
@@ -378,7 +384,10 @@ function moveLeft() {
 
     for (let row = 0; row < SIZE; row++) {
 
-        let line = board.slice(row * SIZE, row * SIZE + SIZE);
+        let line = board.slice(
+            row * SIZE,
+            row * SIZE + SIZE
+        );
 
         const originalLine = [...line];
 
@@ -391,7 +400,9 @@ function moveLeft() {
             if (line[i] === line[i + 1]) {
 
                 line[i] *= 2;
+
                 score += line[i];
+
                 line[i + 1] = 0;
 
                 mergeSound.currentTime = 0;
@@ -400,14 +411,14 @@ function moveLeft() {
                 if (line[i] === 4096 && !cleared) {
 
                     cleared = true;
-                        // 効果音
-                        clearSound.currentTime = 0;
-                        clearSound.play();
+
+                    clearSound.currentTime = 0;
+                    clearSound.play();
 
                     setTimeout(() => {
 
                         showOverlay(
-                             "🎉4096達成！",
+                            "🎉4096達成！",
                             "沢山お祝いしてくれてありがとう！"
                         );
 
@@ -415,7 +426,7 @@ function moveLeft() {
 
                 }
 
-                // 合体した位置を記録
+                // 合体した場所
                 mergedTiles.push(row * SIZE + i);
 
                 i++;
@@ -433,13 +444,20 @@ function moveLeft() {
         }
 
         // 動いたか判定
-        if (originalLine.toString() !== line.toString()) {
+        if (
+            originalLine.toString() !==
+            line.toString()
+        ) {
+
             moved = true;
+
         }
 
         // boardへ戻す
         for (let col = 0; col < SIZE; col++) {
+
             board[row * SIZE + col] = line[col];
+
         }
 
     }
@@ -450,8 +468,10 @@ function moveLeft() {
 
 }
 
-
 function move(direction) {
+
+    // 動く前の盤面を保存
+    const beforeBoard = [...board];
 
     let moved = false;
 
@@ -485,8 +505,20 @@ function move(direction) {
 
     if (moved) {
 
+        // 動いたマスを調べる
+        const movedIndexes = [];
+
+        for (let i = 0; i < SIZE * SIZE; i++) {
+
+            if (beforeBoard[i] !== board[i]) {
+                movedIndexes.push(i);
+            }
+
+        }
+
         addRandomTile();
-        renderBoard();
+
+        renderBoard(movedIndexes);
 
         saveGame();
 
@@ -494,21 +526,22 @@ function move(direction) {
 
     if (!cleared && isGameOver() && !gameOver) {
 
-    gameOver = true;
+        gameOver = true;
 
-    saveGame();
+        saveGame();
 
-    setTimeout(() => {
-        showOverlay(
-            "🌞 Game Over",
-            "うんうん♬最後まで遊んでくれてありがとう！\nまた挑戦してね♪"
-        );
-    },150);
+        setTimeout(() => {
+
+            showOverlay(
+                "🌞 Game Over",
+                "うんうん♬最後まで遊んでくれてありがとう！\nもう一度挑戦してみよう♪"
+            );
+
+        }, 150);
+
+    }
 
 }
-
-}
-
 function isGameOver() {
 
     // 空きマスがあるなら終了じゃない
