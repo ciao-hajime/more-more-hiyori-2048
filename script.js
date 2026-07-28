@@ -72,6 +72,7 @@ function initGame() {
     board = new Array(16).fill(0);
 
     score = 0;
+
     updateScore();
     bestScoreElement.textContent = bestScore;
 
@@ -81,6 +82,8 @@ function initGame() {
     renderBoard();
 
     gameOver = false;
+
+    saveGame();
 
 }
 
@@ -98,6 +101,48 @@ function updateScore() {
         bestScoreElement.textContent = bestScore;
 
     }
+
+}
+
+// ---------- ゲーム保存 ----------
+function saveGame() {
+
+    const gameData = {
+        board: board,
+        score: score,
+        cleared: cleared,
+        gameOver: gameOver
+    };
+
+    localStorage.setItem(
+        "hiyori2048Game",
+        JSON.stringify(gameData)
+    );
+
+}
+
+// ---------- ゲーム読み込み ----------
+function loadGame() {
+
+    const savedGame = localStorage.getItem("hiyori2048Game");
+
+    if (!savedGame) {
+        return false;
+    }
+
+    const gameData = JSON.parse(savedGame);
+
+    board = gameData.board;
+    score = gameData.score;
+    cleared = gameData.cleared;
+    gameOver = gameData.gameOver;
+
+    updateScore();
+    bestScoreElement.textContent = bestScore;
+
+    renderBoard();
+
+    return true;
 
 }
 
@@ -175,12 +220,16 @@ function addRandomTile() {
 // ---------- リスタート ----------
 restartButton.addEventListener("click", () => {
 
+    localStorage.removeItem("hiyori2048Game");
+
     initGame();
 
 });
 
 // ---------- 起動 ----------
-initGame();
+if (!loadGame()) {
+    initGame();
+}
 
 console.log(gameBoard.children.length);
 
@@ -242,6 +291,15 @@ gameBoard.addEventListener("touchend", (event) => {
 }, { passive: false });
 
 function handleKeyDown(event) {
+    // 矢印キーで画面がスクロールするのを防ぐ
+    if (
+        event.key === "ArrowLeft" ||
+        event.key === "ArrowRight" ||
+        event.key === "ArrowUp" ||
+        event.key === "ArrowDown"
+    ) {
+        event.preventDefault();
+    }
 
     // ESCでオーバーレイを閉じる
     if (event.key === "Escape") {
@@ -392,6 +450,7 @@ function moveLeft() {
 
 }
 
+
 function move(direction) {
 
     let moved = false;
@@ -429,11 +488,15 @@ function move(direction) {
         addRandomTile();
         renderBoard();
 
+        saveGame();
+
     }
 
     if (!cleared && isGameOver() && !gameOver) {
 
     gameOver = true;
+
+    saveGame();
 
     setTimeout(() => {
         showOverlay(
