@@ -39,7 +39,7 @@ h1.title {
 .top-bar {
     display: flex;
     justify-content: space-between;
-    height: 120px;
+    height: 62px;
 }
 
 .score-inner {
@@ -48,12 +48,12 @@ h1.title {
 }
 
 .score-inner span {
-    font-size: 2.4rem;
+    font-size: 1.6rem;
     font-weight: bold;
 }
 
 span.label {
-    font-size: 1.4rem;
+    font-size: 14px;
     font-weight: normal;
 }
 
@@ -216,6 +216,7 @@ span.label {
 }
 
 .instructions p {
+    font-size: 12px;
     text-align: left;
 }
 
@@ -432,6 +433,11 @@ h3 {
     }
 
 }
+
+.slide {
+    animation: slide 0.2s ease-out;
+}
+
 /* =========================
    パネル移動
    ========================= */
@@ -448,4 +454,21 @@ h3 {
         opacity: 1;
     }
 
+}
+/* =========================
+   音声ボタン
+   ========================= */
+
+button#sound-btn {
+    color: #708f64;
+    width: 120px;
+    height: 42px;
+    border-radius: 3px;
+    background: #fcfff2;
+    margin: 18px 0 18px auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid #b9c1b8;
+    font-weight: bold;
 }

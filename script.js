@@ -60,6 +60,37 @@ let cleared = false;
 let gameOver = false;
 let mergedTiles = [];
 
+// ---------- 効果音ON/OFF ----------
+let soundEnabled =
+    localStorage.getItem("hiyori2048Sound") !== "off";
+
+const soundButton = document.getElementById("sound-btn");
+
+function updateSoundButton() {
+
+    if (soundEnabled) {
+        soundButton.textContent = "🔊 Sound ON";
+    } else {
+        soundButton.textContent = "🔇 Sound OFF";
+    }
+
+}
+
+soundButton.addEventListener("click", () => {
+
+    soundEnabled = !soundEnabled;
+
+    localStorage.setItem(
+        "hiyori2048Sound",
+        soundEnabled ? "on" : "off"
+    );
+
+    updateSoundButton();
+
+});
+
+updateSoundButton();
+
 
 // ---------- 初期化 ----------
 function initGame() {
@@ -218,8 +249,10 @@ function addRandomTile() {
     board[randomIndex] =
             Math.random() < 0.9 ? 2 : 4;
 
+    if (soundEnabled) {
         spawnSound.currentTime = 0;
         spawnSound.play();
+    }
 
 }
 
@@ -405,17 +438,21 @@ function moveLeft() {
 
                 line[i + 1] = 0;
 
-                mergeSound.currentTime = 0;
-                mergeSound.play();
+                if (soundEnabled) {
+                    mergeSound.currentTime = 0;
+                    mergeSound.play();
+                }
 
                 if (line[i] === 4096 && !cleared) {
 
                     cleared = true;
 
+                if (soundEnabled) {
                     clearSound.currentTime = 0;
                     clearSound.play();
+                }
 
-                    setTimeout(() => {
+                setTimeout(() => {
 
                         showOverlay(
                             "🎉4096達成！",
