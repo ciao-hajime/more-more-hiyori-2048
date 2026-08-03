@@ -129,9 +129,9 @@ span.label {
 
 .tile-number{
     position: absolute;
-    top: 0;
-    left: 4px;
-    font-size: 24px;
+    top: -3px;
+    left: 3px;
+    font-size: 1.3rem;
     font-weight: 800;
     color: #ffffff;
     z-index: 10;
@@ -146,18 +146,19 @@ span.label {
     object-fit: contain;
 }
 
-.tile-2 { background: #fdf9f2; color: white; }
-.tile-4 { background: #5cc1f3;color: white; }
-.tile-8 { background: #fcffd9; color: white; }
-.tile-16 { background: #f7d8ff; color: white;}
-.tile-32 { background: #ff5f99; color: white;}
-.tile-64 { background: #ff96a3; color: white; }
-.tile-128 { background: #bd2525; color: white; font-size: 26px; }
-.tile-256 { background: #ff7ce8; color: white; font-size: 26px; }
-.tile-512 { background: #c7fff3; color: white; font-size: 26px; }
-.tile-1024 { background: #15f3f5; color: white; font-size: 22px; }
-.tile-2048 { background: #209bff; color: white; font-size: 22px; }
-.tile-4096 { background: #fffad5; color: white; font-size: 22px; }
+.tile-2 { background: #fdf9f2;}
+.tile-4 { background: #6e99ff;}
+.tile-8 { background: #f1e5b7; }
+.tile-16 { background: #f7d8ff; }
+.tile-32 { background: #ff5f99; }
+.tile-64 { background: #ff96a3;  }
+.tile-128 { background: #bd2525;  }
+.tile-256 { background: #ff7ce8;  }
+.tile-512 { background: #c7fff3;  }
+.tile-1024 { background: #15f3f5; }
+.tile-2048 { background: #209bff;}
+.tile-4096 { background: linear-gradient(135deg, #fff8d8, #ffd4d4);}
+.tile-8192 { background:linear-gradient(135deg, #ebffaf, #befffc);}
 
 @keyframes pop {
 
@@ -417,13 +418,7 @@ h3 {
         height:calc((95vw - 48px)/4);
 
     }
-
-    .tile-number{
-
-        font-size:20px;
-
-    }
-
+    
     #restart-btn{
 
         font-size:20px;

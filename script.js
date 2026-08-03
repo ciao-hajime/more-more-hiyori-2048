@@ -113,8 +113,6 @@ function initGame() {
 
     renderBoard();
 
-    gameOver = false;
-
     saveGame();
 
 }
@@ -415,55 +413,78 @@ function moveLeft() {
 
     mergedTiles = [];
 
+    // 実際に移動したパネルの「移動先」
+    const slideIndexes = [];
+
     for (let row = 0; row < SIZE; row++) {
 
-        let line = board.slice(
-            row * SIZE,
-            row * SIZE + SIZE
-        );
+        // 値だけではなく「元いた場所」も一緒に持つ
+        let line = board
+            .slice(row * SIZE, row * SIZE + SIZE)
+            .map((value, col) => ({
+                value: value,
+                origin: row * SIZE + col
+            }))
+            .filter(tile => tile.value !== 0);
 
-        const originalLine = [...line];
-
-        // 左へ寄せる
-        line = line.filter(value => value !== 0);
+        const originalLine = line.map(tile => tile.value);
 
         // 合体
         for (let i = 0; i < line.length - 1; i++) {
 
-            if (line[i] === line[i + 1]) {
+            if (line[i].value === line[i + 1].value) {
 
-                line[i] *= 2;
+                // 合体するパネル
+                line[i].value *= 2;
 
-                score += line[i];
+                score += line[i].value;
 
-                line[i + 1] = 0;
+                // 右側のパネルは消える
+                line[i + 1].value = 0;
 
                 if (soundEnabled) {
                     mergeSound.currentTime = 0;
                     mergeSound.play();
                 }
 
-                if (line[i] === 4096 && !cleared) {
+                // 8192達成
+                if (line[i].value === 8192 && !cleared) {
 
                     cleared = true;
 
-                if (soundEnabled) {
-                    clearSound.currentTime = 0;
-                    clearSound.play();
-                }
+                    if (soundEnabled) {
+                        clearSound.currentTime = 0;
+                        clearSound.play();
+                    }
 
-                setTimeout(() => {
+                    setTimeout(() => {
 
                         showOverlay(
-                            "🎉4096達成！",
-                            "沢山お祝いしてくれてありがとう！"
+                            "🎉8192達成！",
+                            "すごい！ここからもまだまだ遊べるよ♪"
                         );
+
+                        overlayButton.onclick = () => {
+
+                            overlay.classList.add("hidden");
+
+                            // 通常のゲームオーバー用ボタンに戻す
+                            overlayButton.textContent = "もう一度遊ぶ";
+
+                            overlayButton.onclick = () => {
+
+                                overlay.classList.add("hidden");
+                                initGame();
+
+                            };
+
+                        };
 
                     }, 200);
 
                 }
 
-                // 合体した場所
+                // 合体後の位置を記録
                 mergedTiles.push(row * SIZE + i);
 
                 i++;
@@ -472,28 +493,58 @@ function moveLeft() {
 
         }
 
-        // もう一度寄せる
-        line = line.filter(value => value !== 0);
+        // 消えたパネルを取り除く
+        line = line.filter(tile => tile.value !== 0);
 
-        // 0を追加
-        while (line.length < SIZE) {
-            line.push(0);
-        }
+        // 新しい位置を決定
+        line.forEach((tile, col) => {
 
-        // 動いたか判定
+            const destination =
+                row * SIZE + col;
+
+            // 元の位置と違うなら「本当に移動した」
+            if (tile.origin !== destination) {
+
+                // 合体したパネルは slide ではなく pop
+                if (!mergedTiles.includes(destination)) {
+
+                    slideIndexes.push(destination);
+
+                }
+
+                moved = true;
+
+            }
+
+        });
+
+        // 元の行と比べて変化があったか
+        const newLine = line.map(tile => tile.value);
+
         if (
             originalLine.toString() !==
-            line.toString()
+            newLine.toString()
         ) {
 
             moved = true;
 
         }
 
+        // 0を追加
+        while (line.length < SIZE) {
+
+            line.push({
+                value: 0,
+                origin: -1
+            });
+
+        }
+
         // boardへ戻す
         for (let col = 0; col < SIZE; col++) {
 
-            board[row * SIZE + col] = line[col];
+            board[row * SIZE + col] =
+                line[col].value;
 
         }
 
@@ -501,67 +552,181 @@ function moveLeft() {
 
     updateScore();
 
-    return moved;
+    return {
+        moved: moved,
+        slideIndexes: slideIndexes,
+        mergedIndexes: [...mergedTiles]
+    };
 
 }
-
 function move(direction) {
 
-    // 動く前の盤面を保存
-    const beforeBoard = [...board];
+    let result;
 
-    let moved = false;
-
-    switch(direction){
+    switch(direction) {
 
         case "left":
-            moved = moveLeft();
+
+            result = moveLeft();
+
             break;
+
 
         case "right":
+
             reverseRows();
-            moved = moveLeft();
+
+            result = moveLeft();
+
             reverseRows();
+
+            // 右向きの座標に戻す
+            result.slideIndexes =
+                result.slideIndexes.map(index => {
+
+                    const row = Math.floor(index / SIZE);
+                    const col = index % SIZE;
+
+                    return row * SIZE + (SIZE - 1 - col);
+
+                });
+
+            result.mergedIndexes =
+                result.mergedIndexes.map(index => {
+
+                    const row = Math.floor(index / SIZE);
+                    const col = index % SIZE;
+
+                    return row * SIZE + (SIZE - 1 - col);
+
+                });
+
             break;
+
 
         case "up":
+
             transposeBoard();
-            moved = moveLeft();
+
+            result = moveLeft();
+
             transposeBoard();
+
+            // 転置前の座標に戻す
+            result.slideIndexes =
+                result.slideIndexes.map(index => {
+
+                    const row = Math.floor(index / SIZE);
+                    const col = index % SIZE;
+
+                    return col * SIZE + row;
+
+                });
+
+            result.mergedIndexes =
+                result.mergedIndexes.map(index => {
+
+                    const row = Math.floor(index / SIZE);
+                    const col = index % SIZE;
+
+                    return col * SIZE + row;
+
+                });
+
             break;
 
+
         case "down":
+
             transposeBoard();
+
             reverseRows();
-            moved = moveLeft();
+
+            result = moveLeft();
+
             reverseRows();
+
             transposeBoard();
+
+            // 下向きの座標に戻す
+            result.slideIndexes =
+                result.slideIndexes.map(index => {
+
+                    const row = Math.floor(index / SIZE);
+                    const col = index % SIZE;
+
+                    return col * SIZE + (SIZE - 1 - row);
+
+                });
+
+            result.mergedIndexes =
+                result.mergedIndexes.map(index => {
+
+                    const row = Math.floor(index / SIZE);
+                    const col = index % SIZE;
+
+                    return col * SIZE + (SIZE - 1 - row);
+
+                });
+
             break;
 
     }
 
-    if (moved) {
+    if (!result || !result.moved) {
 
-        // 動いたマスを調べる
-        const movedIndexes = [];
+        return;
 
-        for (let i = 0; i < SIZE * SIZE; i++) {
+    }
 
-            if (beforeBoard[i] !== board[i]) {
-                movedIndexes.push(i);
-            }
+    // 合体した場所を保存
+    mergedTiles = result.mergedIndexes;
+
+    // 新しいパネルを生成
+    const empty = [];
+
+    board.forEach((value, index) => {
+
+        if (value === 0) {
+
+            empty.push(index);
 
         }
 
-        addRandomTile();
+    });
 
-        renderBoard(movedIndexes);
+    let spawnIndex = -1;
 
-        saveGame();
+    if (empty.length > 0) {
+
+        spawnIndex =
+            empty[Math.floor(Math.random() * empty.length)];
+
+        board[spawnIndex] =
+            Math.random() < 0.9 ? 2 : 4;
+
+        if (soundEnabled) {
+
+            spawnSound.currentTime = 0;
+            spawnSound.play();
+
+        }
 
     }
 
-    if (!cleared && isGameOver() && !gameOver) {
+    // 新しく出現したパネルはスライドさせない
+    const slideIndexes =
+        result.slideIndexes.filter(
+            index => index !== spawnIndex
+        );
+
+    renderBoard(slideIndexes);
+
+    saveGame();
+
+
+    // ゲームオーバー判定
+    if (isGameOver() && !gameOver) {
 
         gameOver = true;
 
@@ -579,6 +744,7 @@ function move(direction) {
     }
 
 }
+
 function isGameOver() {
 
     // 空きマスがあるなら終了じゃない
