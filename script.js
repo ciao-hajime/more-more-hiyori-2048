@@ -5,6 +5,11 @@
 
 // ---------- 設定 ----------
 const SIZE = 4;
+const GAME_ID = "hiyori";
+
+const GAME_SAVE_KEY = `${GAME_ID}2048Game`;
+const BEST_SCORE_KEY = `${GAME_ID}2048BestScore`;
+const SOUND_KEY = `${GAME_ID}2048Sound`;
 
 // ---------- 要素取得 ----------
 const gameBoard = document.getElementById("game-board");
@@ -54,7 +59,8 @@ const clearSound = new Audio("sounds/clear.mp3");
 // ---------- ゲームデータ ----------
 let board = [];
 let score = 0;
-let bestScore = localStorage.getItem("bestScore") || 0;
+let bestScore =
+    localStorage.getItem(BEST_SCORE_KEY) || 0;
 
 let cleared = false;
 let gameOver = false;
@@ -62,7 +68,7 @@ let mergedTiles = [];
 
 // ---------- 効果音ON/OFF ----------
 let soundEnabled =
-    localStorage.getItem("hiyori2048Sound") !== "off";
+    localStorage.getItem(SOUND_KEY) !== "off";
 
 const soundButton = document.getElementById("sound-btn");
 
@@ -81,7 +87,7 @@ soundButton.addEventListener("click", () => {
     soundEnabled = !soundEnabled;
 
     localStorage.setItem(
-        "hiyori2048Sound",
+        SOUND_KEY,
         soundEnabled ? "on" : "off"
     );
 
@@ -126,7 +132,7 @@ function updateScore() {
 
         bestScore = score;
 
-        localStorage.setItem("bestScore", bestScore);
+        localStorage.setItem(BEST_SCORE_KEY, bestScore);
 
         bestScoreElement.textContent = bestScore;
 
@@ -145,7 +151,7 @@ function saveGame() {
     };
 
     localStorage.setItem(
-        "hiyori2048Game",
+        GAME_SAVE_KEY,
         JSON.stringify(gameData)
     );
 
@@ -154,7 +160,9 @@ function saveGame() {
 // ---------- ゲーム読み込み ----------
 function loadGame() {
 
-    const savedGame = localStorage.getItem("hiyori2048Game");
+    const savedGame =
+    localStorage.getItem(GAME_SAVE_KEY);
+
 
     if (!savedGame) {
         return false;
@@ -178,8 +186,6 @@ function loadGame() {
 
 // ---------- 描画 ----------
 function renderBoard(animationData = null) {
-
-    console.log(board);
 
     gameBoard.innerHTML = "";
 
@@ -220,8 +226,6 @@ function renderBoard(animationData = null) {
 
     });
 
-    console.log("マスの数:", gameBoard.children.length);
-
 }
 
 // ---------- ランダム生成 ----------
@@ -257,7 +261,7 @@ function addRandomTile() {
 // ---------- リスタート ----------
 restartButton.addEventListener("click", () => {
 
-    localStorage.removeItem("hiyori2048Game");
+    localStorage.removeItem(GAME_SAVE_KEY);
 
     initGame();
 
@@ -267,8 +271,6 @@ restartButton.addEventListener("click", () => {
 if (!loadGame()) {
     initGame();
 }
-
-console.log(gameBoard.children.length);
 
 // ---------- キーボード ----------
 document.addEventListener("keydown", handleKeyDown);
@@ -341,10 +343,22 @@ function handleKeyDown(event) {
     // ESCでオーバーレイを閉じる
     if (event.key === "Escape") {
 
-        overlay.classList.add("hidden");
-        return;
+    overlay.classList.add("hidden");
 
-    }
+    overlayButton.textContent = "もう一度遊ぶ";
+
+    overlayButton.onclick = () => {
+
+        overlay.classList.add("hidden");
+        initGame();
+
+    };
+
+    return;
+
+}
+
+    
 
     // ゲームオーバー中は操作しない
     if (gameOver) return;
@@ -464,6 +478,7 @@ function moveLeft() {
                             "沢山遊んでくれてありがとう！\nと～っても、いい日和♪\nハイスコア目指して続けて遊べるね！また遊んでね♪"
                         );
 
+                        overlayButton.textContent = "ゲームを続ける";
                         overlayButton.onclick = () => {
 
                             overlay.classList.add("hidden");
@@ -559,160 +574,99 @@ function moveLeft() {
     };
 
 }
-function move(direction) {
 
+function move(direction) {
     let result;
 
-    switch(direction) {
-
+    switch (direction) {
         case "left":
-
             result = moveLeft();
-
             break;
-
 
         case "right":
-
             reverseRows();
-
             result = moveLeft();
-
             reverseRows();
 
-            // 右向きの座標に戻す
-            result.slideIndexes =
-                result.slideIndexes.map(index => {
-
-                    const row = Math.floor(index / SIZE);
-                    const col = index % SIZE;
-
-                    return row * SIZE + (SIZE - 1 - col);
-
-                });
-
-            result.mergedIndexes =
-                result.mergedIndexes.map(index => {
-
-                    const row = Math.floor(index / SIZE);
-                    const col = index % SIZE;
-
-                    return row * SIZE + (SIZE - 1 - col);
-
-                });
-
+            // 右向きの座標を元に戻す: col -> (SIZE - 1 - col)
+            const mapRight = (index) => {
+                const r = Math.floor(index / SIZE);
+                const c = index % SIZE;
+                return r * SIZE + (SIZE - 1 - c);
+            };
+            result.slideIndexes = result.slideIndexes.map(mapRight);
+            result.mergedIndexes = result.mergedIndexes.map(mapRight);
             break;
-
 
         case "up":
-
             transposeBoard();
-
             result = moveLeft();
-
             transposeBoard();
 
-            // 転置前の座標に戻す
-            result.slideIndexes =
-                result.slideIndexes.map(index => {
-
-                    const row = Math.floor(index / SIZE);
-                    const col = index % SIZE;
-
-                    return col * SIZE + row;
-
-                });
-
-            result.mergedIndexes =
-                result.mergedIndexes.map(index => {
-
-                    const row = Math.floor(index / SIZE);
-                    const col = index % SIZE;
-
-                    return col * SIZE + row;
-
-                });
-
+            // 上向きの座標を元に戻す（転置の逆: (r, c) -> (c, r)）
+            const mapUp = (index) => {
+                const r = Math.floor(index / SIZE);
+                const c = index % SIZE;
+                return c * SIZE + r;
+            };
+            result.slideIndexes = result.slideIndexes.map(mapUp);
+            result.mergedIndexes = result.mergedIndexes.map(mapUp);
             break;
-
 
         case "down":
-
             transposeBoard();
-
             reverseRows();
-
             result = moveLeft();
-
             reverseRows();
-
             transposeBoard();
 
-            // 下向きの座標に戻す
-            result.slideIndexes =
-                result.slideIndexes.map(index => {
-
-                    const row = Math.floor(index / SIZE);
-                    const col = index % SIZE;
-
-                    return col * SIZE + (SIZE - 1 - row);
-
-                });
-
-            result.mergedIndexes =
-                result.mergedIndexes.map(index => {
-
-                    const row = Math.floor(index / SIZE);
-                    const col = index % SIZE;
-
-                    return col * SIZE + (SIZE - 1 - row);
-
-                });
-
+            // 下向きの座標を元に戻す（転置＋行反転の逆）
+            const mapDown = (index) => {
+                const r = Math.floor(index / SIZE);
+                const c = index % SIZE;
+                // moveLeft実行時点の(r, c)は、元ボードの (SIZE - 1 - c, r) に対応
+                return (SIZE - 1 - c) * SIZE + r;
+            };
+            result.slideIndexes = result.slideIndexes.map(mapDown);
+            result.mergedIndexes = result.mergedIndexes.map(mapDown);
             break;
-
     }
 
-    if (!result || !result.moved) {
+    if (!result || !result.moved) return;
+        // 合体した場所を保存
+        mergedTiles = result.mergedIndexes;
 
-        return;
+        // 新しいパネルを生成
+        const empty = [];
 
-    }
+        board.forEach((value, index) => {
 
-    // 合体した場所を保存
-    mergedTiles = result.mergedIndexes;
+            if (value === 0) {
 
-    // 新しいパネルを生成
-    const empty = [];
+                empty.push(index);
 
-    board.forEach((value, index) => {
+            }
 
-        if (value === 0) {
+        });
 
-            empty.push(index);
+        let spawnIndex = -1;
+
+        if (empty.length > 0) {
+
+            spawnIndex =
+                empty[Math.floor(Math.random() * empty.length)];
+
+            board[spawnIndex] =
+                Math.random() < 0.9 ? 2 : 4;
+
+            if (soundEnabled) {
+
+                spawnSound.currentTime = 0;
+                spawnSound.play();
+
+            }
 
         }
-
-    });
-
-    let spawnIndex = -1;
-
-    if (empty.length > 0) {
-
-        spawnIndex =
-            empty[Math.floor(Math.random() * empty.length)];
-
-        board[spawnIndex] =
-            Math.random() < 0.9 ? 2 : 4;
-
-        if (soundEnabled) {
-
-            spawnSound.currentTime = 0;
-            spawnSound.play();
-
-        }
-
-    }
 
     // 新しく出現したパネルはスライドさせない
     const slideIndexes =
@@ -736,7 +690,7 @@ function move(direction) {
 
             showOverlay(
                 "🌞 Game Over",
-                "うんうん♬最後まで遊んでくれて\nありがとう！\nまた遊びに来てね♪"
+                "最後まで遊んでくれて\nありがとう\nまた遊んでね♪"
             );
 
         }, 150);
