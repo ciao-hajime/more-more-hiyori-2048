@@ -281,31 +281,56 @@ span.label {
 }
 
 .link-item {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    height: 52px;
-    background: #9bc8e3;
-    border-radius: 4px;
-}
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        height: 52px;
+        border-radius: 4px;
+    }
 
-.link-item a {
-    text-decoration: none;
-    color: #5b6b7f;
-    font-family: none;
-    font-weight: bold;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
+    .link-item a {
+        text-decoration: none;
+        font-family: none;
+        font-weight: bold;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
 
-.link-item a:hover{
-    background: #8ab2ca;
-    transition: 0.5s;
-}
+    .link-item a:hover{
+        transition: 0.5s;
+    }
+
+    .link-item-nagisa{
+        background: #df7c57;
+        margin: 0 0 16px;
+    }
+
+    .link-item-nagisa a{
+        color: #eee9e8;
+    }
+
+    .link-item-nagisa a:hover{
+        background: #d1704d;
+        transition: 0.5s;
+    }
+
+    .link-item-jun{
+        background: #9bc8e3;
+        margin: 0 0 16px;
+    }
+
+    .link-item-jun a{
+        color: #5b6b7f;
+    }
+
+    .link-item-jun a:hover{
+        background: #8ab2ca;
+        transition: 0.5s;
+    }
 
 
 /*---------- クレジット ---------- */
